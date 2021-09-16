@@ -1,0 +1,34 @@
+service: dev-datasette-aws
+frameworkVersion: '2'
+provider:
+  name: aws
+  stage: ${opt:stage}
+  environment:
+      STAGE: ${self:provider.stage}
+  runtime: python3.8
+  region: us-west-2
+  lambdaHashingVersion: 20201221
+  memorySize: 512
+  timeout: 60
+  apiName: ${self:service}-${opt:stage}
+  apiGateway:
+    description: REST API ${self:service}
+    metrics: true
+  ecr:
+    images:
+      devDatasetteAwsImage:
+        path: ./
+functions:
+  devDatasetteAws:
+    timeout: 10
+    image:
+      name: devDatasetteAwsImage
+    events:
+      - http:
+          path: /
+          method: any
+          cors: true      
+      - http:
+          path: /{proxy+}
+          method: any
+          cors: true
